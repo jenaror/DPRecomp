@@ -18,10 +18,14 @@
 #include <rex/ui/overlay/debug_overlay.h>
 
 #include "deadlyprem_iso_installer.h"
+#if DP_NATIVE_RENDERER  // D3D12 only; off on macOS/Linux (CMakeLists.txt)
 #include "native/native_graphics_system.h"
+#endif
 
 void DPInstallPadLayoutFilter();  // src/deadlyprem_hooks.cpp
+#if DP_NATIVE_RENDERER
 void DPEnableGpuValidation();     // src/native/native_hooks.cpp [new_fix_25092026_glitch] #37
+#endif
 
 class DeadlypremApp : public rex::ReXApp {
  public:
@@ -46,10 +50,12 @@ class DeadlypremApp : public rex::ReXApp {
     // 2026-09-18: experimental native renderer (launcher switch "Native
     // renderer (experimental)" = cvar dp_native_render). With it on, the
     // Xenos plugin is not loaded at all; off = the emulated path unchanged.
+#if DP_NATIVE_RENDERER
     if (dp::native::Enabled()) {
       REXLOG_INFO("Native renderer ENABLED (dp_native_render): replacing the Xenos GPU emulator");
       config.graphics = std::make_unique<dp::native::NativeGraphicsSystem>();
     }
+#endif
   }
 
   // First-run install chain (ported 2026-09-06 from DownpourRecomp PR #27 by
@@ -174,7 +180,9 @@ class DeadlypremApp : public rex::ReXApp {
   // Other virtual hooks available for customization:
   void OnPostInitLogging() override {
     DPInstallPadLayoutFilter();  // #19 controller layout (deadlyprem_hooks.cpp)
+#if DP_NATIVE_RENDERER
     DPEnableGpuValidation();     // [new_fix_25092026_glitch] #37, before the D3D12 device exists
+#endif
     // DP1 diagnostics: build stamp as the first application line of every log.
     REXLOG_INFO("Deadly Premonition Recompilation 2.0.14 (build " __DATE__ ") - ReXGlue 0.10 nightly - by «Little Bit»");
   }

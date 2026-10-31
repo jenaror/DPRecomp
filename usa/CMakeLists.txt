@@ -43,11 +43,26 @@ set(DEADLYPREM_SOURCES
     src/deadlyprem_camera_hook.cpp
     src/deadlyprem_iso_installer.cpp
     src/deadlyprem_acquire_wizard.cpp
-    src/native/native_graphics_system.cpp
-    src/native/native_hooks.cpp
-    src/native/native_renderer.cpp
-    src/native/native_texrep.cpp  # [NEW FABLE VERSION] textures\<hash>.png on the native path
 )
+
+# DP mac port: the experimental native renderer is Direct3D 12 only. Without
+# it its XDK hooks are not linked, so the recompiled originals run, which is
+# what the emulated path does anyway (see src/native/native_hooks.cpp).
+if(WIN32)
+    set(DP_NATIVE_RENDERER_DEFAULT ON)
+else()
+    set(DP_NATIVE_RENDERER_DEFAULT OFF)
+endif()
+option(DP_NATIVE_RENDERER "Build the experimental D3D12 native renderer"
+    ${DP_NATIVE_RENDERER_DEFAULT})
+if(DP_NATIVE_RENDERER)
+    list(APPEND DEADLYPREM_SOURCES
+        src/native/native_graphics_system.cpp
+        src/native/native_hooks.cpp
+        src/native/native_renderer.cpp
+        src/native/native_texrep.cpp  # [NEW FABLE VERSION] textures\<hash>.png on the native path
+    )
+endif()
 
 # DP1 2026-09-06: embed the game icon on Windows (see src/deadlyprem.rc).
 if(WIN32)
@@ -61,6 +76,8 @@ else()
 endif()
 
 rexglue_setup_target(deadlyprem GPU_PLUGINS xenos)
+target_compile_definitions(deadlyprem PRIVATE
+    DP_NATIVE_RENDERER=$<BOOL:${DP_NATIVE_RENDERER}>)
 
 # USA / NTSC build (title 494F07D4): same app sources as the PAL project, separate
 # recompilation; ships next to the PAL exe and is picked by the launcher.

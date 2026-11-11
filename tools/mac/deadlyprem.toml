@@ -1,0 +1,108 @@
+# Deadly Premonition Recompilation - macOS settings (Vulkan via MoltenVK).
+# Starting point: the settings DPLauncher writes on Windows, without the
+# Direct3D 12, native-renderer and FSR keys (none of them exist on the Mac).
+
+# Graphics
+# Host render targets (the default). "fsi" was tried on 2026-10-30 and is
+# worse on MoltenVK: tiled dark areas and the same false-colour sky.
+resolution_scale = 1
+native_2x_msaa = true
+anisotropic_override = 5
+swap_post_effect = "fxaa"
+present_letterbox = true
+vsync = true
+fullscreen = false
+window_width = 1920
+window_height = 1080
+monitor = 0
+gpu_plugin = "xenos"
+video_mode_width = 1280
+video_mode_height = 720
+video_mode_refresh_rate = 60.0
+gpu_allow_invalid_fetch_constants = true
+readback_memexport = true
+occlusion_query_enable = true
+async_shader_compilation = true
+store_shaders = true
+show_shader_compile_indicator = true
+shader_compile_indicator_verbose = false
+texture_replacement = true
+texture_path = ""
+texture_cache_memory_limit_soft = 384
+texture_cache_memory_limit_hard = 768
+# Run the vertex shader of unclipped draws (mostly full-screen passes) on the
+# CPU to find how much of the EDRAM they touch - upstream Xenia's default.
+# Without it they claim up to the whole EDRAM, causing extra ownership copies
+# and full-height render passes (a big cost on Apple's tile-based GPUs).
+execute_unclipped_draw_vs_on_cpu = true
+
+# Game
+dp_60fps = true
+dp_60fps_tick_min = 0.5
+dp_skip_intro = "off"
+user_language = 1
+
+# Audio. "stereo" folds the game's 5.1 mix down to two channels; macOS reports
+# MacBook speakers as six channels, which is the setup where dialogue went
+# quiet on Windows (DPRecomp #19).
+audio_mute = false
+audio_channels = "stereo"
+
+# Input
+input_backend = "sdl"
+hid_mappings_file = "gamecontrollerdb.txt"
+mnk_mode = true
+mnk_mouse = true
+mnk_sensitivity = 1.0
+mnk_stick_scale = 300.0
+mnk_deadzone_floor = 8689
+mnk_invert_y = false
+mnk_aim_axis_floor = true
+mnk_key_stick_ramp_ms = 60.0
+mnk_auto_shake = false
+mnk_auto_shake_hz = 12.0
+mnk_tap_shake_window_ms = 250.0
+mnk_tap_shake_hold_ms = 300.0
+mnk_wheel_rstick_ms = 120.0
+dp_mouse_camera = true
+dp_mouse_camera_sensitivity = 0.003
+dp_mouse_camera_invert_y = false
+dp_mouse_camera_direct = true
+dp_mouse_camera_catchup = true
+dp_mouse_camera_hold_ms = 120
+dp_mouse_camera_car_hold_ms = 1000
+dp_pad_layout = "original"
+dualsense_adaptive_triggers = true
+dualsense_rt_mode = "weapon"
+dualsense_rt_start = 3
+dualsense_rt_end = 6
+dualsense_rt_strength = 5
+dualsense_lt_mode = "feedback"
+dualsense_lt_start = 2
+dualsense_lt_end = 0
+dualsense_lt_strength = 4
+keybind_a = "E,Space+LMB"
+keybind_b = "R"
+keybind_x = "Shift"
+keybind_y = "F"
+keybind_left_trigger = "Control"
+keybind_right_trigger = "Space"
+keybind_left_shoulder = "Z"
+keybind_right_shoulder = "X"
+keybind_lstick_press = "C"
+keybind_rstick_press = "K"
+keybind_lstick_up = "W"
+keybind_lstick_down = "S"
+keybind_lstick_left = "A"
+keybind_lstick_right = "D"
+keybind_dpad_up = "WheelUp"
+keybind_dpad_down = "WheelDown"
+keybind_dpad_left = "Shift+Left"
+keybind_dpad_right = "Shift+Right"
+keybind_back = "M"
+keybind_start = "Return"
+
+# Logging
+log_level = "info"
+log_max_files = 20
+log_max_file_size_mb = 5

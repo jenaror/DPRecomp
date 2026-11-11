@@ -13,6 +13,8 @@ usa/generated/default/
 out/
 build/
 launcher/build/
+# tools/mac/make-app.sh
+dist/
 
 # Runtime data
 userdata/

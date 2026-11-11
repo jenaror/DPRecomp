@@ -19,6 +19,8 @@
 
 `DPRecomp-2.0.14-win64.zip` · 47 MB · Windows 10 / 11 64-bit
 
+**Mac with Apple Silicon:** an experimental native build of the USA version, [see docs/MACOS.md](docs/MACOS.md).
+
 [Release notes](docs/RELEASE-NOTES-2.0.14.md) · [Steam artwork pack](https://github.com/LittleBitUA/DPRecomp/releases/download/v1.3.0/DPRecomp-Steam-artwork.zip) · [Report a bug](https://github.com/LittleBitUA/DPRecomp/issues/new) · [Changelog](docs/CHANGELOG.md)
 
 **by the «Little Bit» team &nbsp;·&nbsp; 🇺🇦 MADE IN UKRAINE**
@@ -285,6 +287,8 @@ Yes. Turn on *Texture Dump* in the launcher (Advanced), play, pick the PNG from 
 3. Put your PAL `default.xex` into `assets\` and run the recompiler: `rexglue codegen deadlyprem_manifest.toml` (about 10 seconds; the function list and the mid-asm hooks live in `deadlyprem_config.toml`, the USA build in `usa\`).
 4. Configure with `cmake --preset dp-relwithdebinfo` (uses `CMakeUserPresets.json` to point at your SDK install) and build. The default build is the compatibility (SSE4.1) build; `-DDP_ENABLE_X86_64_V3=ON` enables AVX2.
 5. The launcher is a separate CMake project in `launcher\` (Visual Studio generator).
+
+macOS (Apple Silicon): see [docs/MACOS.md](docs/MACOS.md#building-from-source).
 </details>
 
 ---

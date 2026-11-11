@@ -2,6 +2,8 @@
 
 A native Apple Silicon build of the **USA** version of DPRecomp 2.0.14. It draws through ReXGlue's Vulkan renderer on MoltenVK (Apple's Metal underneath), with no Windows layer and no Rosetta. On an M4 MacBook Air it runs at or near 60 fps in the places tested so far, the forest and the town included.
 
+This is an unofficial community port, not a release of the «Little Bit» team. Download it from [the releases page](https://github.com/jenaror/DPRecomp/releases) and report Mac problems in [this fork's issues](https://github.com/jenaror/DPRecomp/issues), not upstream.
+
 ## What you need
 
 - A Mac with Apple Silicon (M1 or later) and macOS 13.3 Ventura or later. Intel Macs are not supported.
@@ -47,8 +49,8 @@ Deleting the folder resets the app, saves included. The app itself is never writ
 <details>
 <summary><b>Click to expand</b></summary>
 
-1. Install the Xcode Command Line Tools (`xcode-select --install`) and, with Homebrew, `brew install cmake ninja molten-vk vulkan-loader vulkan-headers`.
-2. Build and install the ReXGlue SDK at commit `0c7b01a` with DPRecomp's SDK patch ([`docs/sdk-patches`](sdk-patches)) and the macOS changes (the `dp-mac` branch of the SDK used for this port): `cmake --preset mac-arm64`, then build and install the `Release` and `RelWithDebInfo` configurations with `cmake --build --preset mac-arm64-release` and `cmake --install out/build/mac-arm64 --config Release` (likewise for RelWithDebInfo).
+1. Install the Xcode Command Line Tools (`xcode-select --install`) and, with Homebrew, `brew install cmake ninja molten-vk vulkan-loader vulkan-headers`. Clone this repository's `mac-port` branch and the SDK's `dp-mac` branch ([jenaror/rexglue-sdk](https://github.com/jenaror/rexglue-sdk/tree/dp-mac): ReXGlue at commit `0c7b01a` with DPRecomp's SDK patch from [`docs/sdk-patches`](sdk-patches) and the macOS changes) into the same folder, as `DPRecomp` and `rexglue-sdk`.
+2. Build and install the SDK in `rexglue-sdk`: `cmake --preset mac-arm64`, then build and install the `Release` and `RelWithDebInfo` configurations with `cmake --build --preset mac-arm64-release` and `cmake --install out/build/mac-arm64 --config Release` (likewise for RelWithDebInfo).
 3. Extract your USA disc into `usa/assets/` (for example with the app's installer, then copy `~/Library/Application Support/DPRecomp/assets`) and run the recompiler in `usa/`: `<SDK install>/bin/rexglue codegen deadlyprem_manifest.toml`.
 4. Configure and build the game in `usa/`:
    ```
@@ -58,7 +60,7 @@ Deleting the folder resets the app, saves included. The app itself is never writ
    cmake --build out/build/mac-arm64-release -j6 --target deadlyprem
    ```
    The native renderer is left out on the Mac (`DP_NATIVE_RENDERER`, on only on Windows).
-5. Package the app: `GAMECONTROLLERDB=<path to gamecontrollerdb.txt> tools/mac/make-app.sh` writes `dist/Deadly Premonition Recomp.app` and the zip. The controller database is optional ([SDL_GameControllerDB](https://github.com/mdqinc/SDL_GameControllerDB)); the Mac default settings are `tools/mac/deadlyprem.toml`.
+5. Package the app: `GAMECONTROLLERDB=<path to gamecontrollerdb.txt> tools/mac/make-app.sh` writes `dist/Deadly Premonition Recomp.app` and the zip. The controller database is optional ([SDL_GameControllerDB](https://github.com/mdqinc/SDL_GameControllerDB)); the Mac default settings are `tools/mac/deadlyprem.toml`. The app also carries the license texts of the port, the SDK and the libraries it includes, taken from the SDK's source (`REXGLUE_SDK=<folder>` if it is not next to `DPRecomp`).
 
 A build folder also runs as is: `out/build/mac-arm64-release/deadlyprem_usa`, with the game files in an `assets` folder next to it and `tools/mac/deadlyprem.toml` copied there. Saves, settings and logs then stay in that folder, as on Windows.
 </details>

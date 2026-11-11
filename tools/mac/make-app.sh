@@ -2,7 +2,8 @@
 # Packages a macOS build of the USA version as "Deadly Premonition Recomp.app"
 # and a zip of it: the game, the ReXGlue SDK libraries, the Vulkan loader and
 # MoltenVK the build uses, the Mac default settings (deadlyprem.toml next to
-# this script), the texture replacements and the icon, ad-hoc signed.
+# this script), the texture replacements, the icon and the license texts,
+# ad-hoc signed.
 #
 # The app keeps the game data, saves, settings and logs in
 # ~/Library/Application Support/DPRecomp (PortableRoot in deadlyprem_app.h);
@@ -55,6 +56,24 @@ cp "$REPO"/textures/*.png "$REPO/textures/README.txt" "$APP/Contents/Resources/t
 if [ -n "${GAMECONTROLLERDB:-}" ]; then
   cp "$GAMECONTROLLERDB" "$APP/Contents/Resources/gamecontrollerdb.txt"
 fi
+
+# License texts: this port, the ReXGlue SDK, and the libraries the SDK builds
+# in or the app carries (its thirdparty folder, MoltenVK and the Vulkan loader
+# included). REXGLUE_SDK=<SDK source folder> if it is not next to this
+# repository.
+SDK_SOURCE="${REXGLUE_SDK:-$(cd "$REPO/.." && pwd)/rexglue-sdk}"
+[ -f "$SDK_SOURCE/LICENSE" ] || { echo "No ReXGlue SDK source at $SDK_SOURCE (set REXGLUE_SDK)" >&2; exit 1; }
+LICENSES="$APP/Contents/Resources/licenses"
+mkdir -p "$LICENSES"
+cp "$REPO/LICENSE" "$LICENSES/DPRecomp.txt"
+cp "$SDK_SOURCE/LICENSE" "$LICENSES/ReXGlue.txt"
+for dir in "$SDK_SOURCE"/thirdparty/*/; do
+  name="$(basename "$dir")"
+  find "$dir" -maxdepth 2 -type f \( -iname 'LICENSE*' -o -iname 'COPYING*' \) \
+       -not -name '*.cfg' -not -path '*/test/*' -not -path '*/cli/*' | sort | while read -r file; do
+    cp "$file" "$LICENSES/$name-$(basename "$file")"
+  done
+done
 
 # Icon, from the Windows one (256 px at most).
 ICON_WORK="$(mktemp -d)"

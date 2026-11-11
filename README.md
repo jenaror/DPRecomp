@@ -19,7 +19,7 @@
 
 `DPRecomp-2.0.14-win64.zip` · 47 MB · Windows 10 / 11 64-bit
 
-**Mac with Apple Silicon:** an experimental native build of the USA version, [see docs/MACOS.md](docs/MACOS.md).
+**Mac with Apple Silicon:** an unofficial, experimental native build of the USA version, [see docs/MACOS.md](docs/MACOS.md).
 
 [Release notes](docs/RELEASE-NOTES-2.0.14.md) · [Steam artwork pack](https://github.com/LittleBitUA/DPRecomp/releases/download/v1.3.0/DPRecomp-Steam-artwork.zip) · [Report a bug](https://github.com/LittleBitUA/DPRecomp/issues/new) · [Changelog](docs/CHANGELOG.md)
 

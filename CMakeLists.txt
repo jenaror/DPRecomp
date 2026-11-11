@@ -69,6 +69,12 @@ if(WIN32)
     list(APPEND DEADLYPREM_SOURCES src/deadlyprem.rc)
 endif()
 
+# DP mac port: the disc image picker is an AppKit open panel.
+if(APPLE)
+    enable_language(OBJCXX)
+    list(APPEND DEADLYPREM_SOURCES src/deadlyprem_iso_picker_mac.mm)
+endif()
+
 if(WIN32)
     add_executable(deadlyprem WIN32 ${DEADLYPREM_SOURCES})
 else()
@@ -78,6 +84,10 @@ endif()
 rexglue_setup_target(deadlyprem GPU_PLUGINS xenos)
 target_compile_definitions(deadlyprem PRIVATE
     DP_NATIVE_RENDERER=$<BOOL:${DP_NATIVE_RENDERER}>)
+if(APPLE)
+    target_link_libraries(deadlyprem PRIVATE
+        "-framework AppKit" "-framework UniformTypeIdentifiers")
+endif()
 
 # DP1 #19 (2026-09-14): controller layout remap + intro skip state machine
 # tests (plain executables, no framework):

@@ -21,11 +21,20 @@
 #include <commdlg.h>
 #include <windows.h>
 #elif defined(__APPLE__)
+#include <crt_externs.h>
+#include <spawn.h>
+
+#include <rex/filesystem.h>
 #else
 #include <gtk/gtk.h>
 #endif
 
 namespace deadlyprem {
+
+#if defined(__APPLE__)
+// deadlyprem_iso_picker_mac.mm
+std::filesystem::path PickIsoFileMac();
+#endif
 
 namespace {
 
@@ -268,8 +277,7 @@ std::filesystem::path PickIsoFile() {
 }
 #elif defined(__APPLE__)
 std::filesystem::path PickIsoFile() {
-  REXLOG_ERROR("The ISO file picker is not implemented on macOS.");
-  return {};
+  return PickIsoFileMac();
 }
 #else
 std::filesystem::path PickIsoFile() {
@@ -384,6 +392,22 @@ void RelaunchSelfOrResume(rex::PathConfig runtime_paths,
     REXLOG_ERROR("Failed to start {} after install (Win32 error {}); resuming inline.",
                  exe.filename().string(), GetLastError());
   }
+#elif defined(__APPLE__)
+  // DP mac port: a fresh process here too, with the same arguments (the region
+  // was checked before extracting), rather than starting the runtime from
+  // inside the wizard's UI callback.
+  {
+    const std::string exe = rex::filesystem::GetExecutablePath().string();
+    pid_t pid;
+    int result = posix_spawn(&pid, exe.c_str(), nullptr, nullptr, *_NSGetArgv(), *_NSGetEnviron());
+    if (result == 0) {
+      REXLOG_INFO("Game data installed; starting the game again to pick up the files.");
+      rex::FlushLogging();
+      std::_Exit(0);
+    }
+    REXLOG_ERROR("Failed to start the game again after install (error {}); resuming inline.",
+                 result);
+  }
 #endif
   if (complete) {
     complete(std::move(runtime_paths));
@@ -419,6 +443,27 @@ bool InstallGameDataFromIso(const std::filesystem::path& iso_path,
   if (!reader.HasXex2Magic(*xex, error)) {
     return false;
   }
+#if !defined(_WIN32)
+  // DP mac port: Windows switches to the other region's executable after the
+  // install (PickExecutableForGameRoot); elsewhere only this build's region is
+  // available, so refuse the other disc before extracting it (default.xex
+  // sizes: PAL 10,113,024, USA 10,080,256).
+#if DP_REGION_USA
+  if (xex->size == 10113024) {
+    error =
+        "This is the European (PAL) release. This version of the port plays the "
+        "USA release of Deadly Premonition.";
+    return false;
+  }
+#else
+  if (xex->size == 10080256) {
+    error =
+        "This is the USA release. This version of the port plays the European "
+        "(PAL) release of Deadly Premonition.";
+    return false;
+  }
+#endif
+#endif
 
   uint64_t total = 0;
   for (const auto& f : files) {
@@ -482,9 +527,16 @@ void ShowIsoInstallWizard(rex::ui::ImGuiDrawer* drawer, rex::PathConfig runtime_
       "will be extracted here - nothing else to do.";
   options.target_directory = game_root.string();
   options.initial_status =
+#if defined(_WIN32)
+      "Select the disc image dumped from your copy of the game (Europe/PAL or "
+      "USA release). Extraction needs ~5.5 GiB of free space.";
+#elif DP_REGION_USA
+      "Select the disc image dumped from your copy of the game (USA release). "
+      "Extraction needs ~5.5 GiB of free space.";
+#else
       "Select the disc image dumped from your copy of the game (Europe/PAL "
-      "release; the USA disc is not supported yet). Extraction needs ~5.5 GiB "
-      "of free space.";
+      "release). Extraction needs ~5.5 GiB of free space.";
+#endif
   // No fetch button: the game data cannot be downloaded, only extracted from
   // the user's own dump.
   options.pick_button_label = "Select disc image...";

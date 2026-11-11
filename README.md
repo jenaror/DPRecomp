@@ -1,3 +1,8 @@
+> [!NOTE]
+> **This is an unofficial macOS fork** of [LittleBitUA/DPRecomp](https://github.com/LittleBitUA/DPRecomp), the «Little Bit» team's project. It adds a native Apple Silicon build of the USA version.
+> **Mac players:** [download](https://github.com/jenaror/DPRecomp/releases) · [Mac guide](docs/MACOS.md) · [report a Mac problem](https://github.com/jenaror/DPRecomp/issues)
+> Everything below is the original project's README. On Windows, use the [official releases](https://github.com/LittleBitUA/DPRecomp/releases).
+
 <div align="center">
 
 <img src="docs/logo.png" alt="Deadly Premonition" width="720">

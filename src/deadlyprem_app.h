@@ -100,8 +100,9 @@ class DeadlypremApp : public rex::ReXApp {
     // runtime dies with "--game_data_root was not provided". Default to the
     // conventional <exe dir>\assets like every DPRecomp release so far; an
     // explicit --game_data_root on the command line still wins.
+    const std::filesystem::path portable_root = PortableRoot(paths);
     if (paths.game_data_root.empty()) {
-      paths.game_data_root = rex::filesystem::GetExecutableFolder() / "assets";
+      paths.game_data_root = portable_root / "assets";
     }
     // Saves / profile / shader cache (2026-09-06, fixed in 1.1). The SDK hands
     // us user_data_root already resolved to Documents\deadlyprem (its platform
@@ -114,12 +115,49 @@ class DeadlypremApp : public rex::ReXApp {
     // cache\shaders\shareable\) from the legacy Documents location.
     const std::filesystem::path legacy_user_root = paths.user_data_root;
     if (!rex::cvar::HasNonDefaultValue("user_data_root")) {
-      paths.user_data_root = rex::filesystem::GetExecutableFolder() / "userdata";
+      paths.user_data_root = portable_root / "userdata";
     }
     if (!rex::cvar::HasNonDefaultValue("cache_root")) {
       paths.cache_root = paths.user_data_root / "cache";
     }
     MigrateLegacyUserData(legacy_user_root, paths.user_data_root, paths.cache_root);
+  }
+
+  // DP mac port: the folder holding the game data, saves, settings and logs:
+  // the executable's, like the Windows release, except in a macOS app bundle,
+  // which must not be written to. There it is ~/Library/Application
+  // Support/DPRecomp, seeded once from the bundle's Resources (default
+  // settings, controller mappings, texture replacements) and made the working
+  // directory, as the Windows release's folder is.
+  static std::filesystem::path PortableRoot([[maybe_unused]] rex::PathConfig& paths) {
+    namespace fs = std::filesystem;
+    const fs::path exe_dir = rex::filesystem::GetExecutableFolder();
+#if defined(__APPLE__)
+    const fs::path contents = exe_dir.parent_path();
+    const char* home = std::getenv("HOME");
+    if (exe_dir.filename() == "MacOS" && contents.filename() == "Contents" &&
+        contents.parent_path().extension() == ".app" && home && *home) {
+      const fs::path root = fs::path(home) / "Library" / "Application Support" / "DPRecomp";
+      const fs::path resources = contents / "Resources";
+      std::error_code ec;
+      fs::create_directories(root, ec);
+      for (const fs::path name : {paths.config_path.filename(), fs::path("gamecontrollerdb.txt")}) {
+        if (!fs::exists(root / name, ec)) {
+          fs::copy_file(resources / name, root / name, ec);
+        }
+      }
+      fs::copy(resources / "textures", root / "textures",
+               fs::copy_options::recursive | fs::copy_options::skip_existing, ec);
+      paths.config_path = root / paths.config_path.filename();
+      paths.log_root = root / "logs";
+      if (!rex::cvar::HasNonDefaultValue("texture_path")) {
+        rex::cvar::SetFlagByName("texture_path", (root / "textures").string());
+      }
+      fs::current_path(root, ec);
+      return root;
+    }
+#endif
+    return exe_dir;
   }
 
   // One-time copy of the Documents\deadlyprem state into the portable layout.
